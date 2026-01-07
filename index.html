@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAMEES ALI | Architecture + Design</title>
+    <style>
+        /* --- 1. RESET & VARIABLES --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-color: #ffffff;
+            --text-primary: #000000;
+            --text-secondary: #666666;
+            
+            /* NAVBAR COLORS */
+            --nav-bg: #000000;
+            --nav-text: #ffffff;
+            --nav-sub-text: #aaaaaa;
+            
+            --intro-bg: #000000;
+            --font-main: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            --header-height: 90px; 
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            scroll-behavior: smooth; /* Enables native smooth scrolling */
+        }
+
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        input, textarea, button { font-family: inherit; }
+
+        /* --- 2. INTRO ANIMATION --- */
+        #intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: var(--intro-bg);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: liftCurtain 1s cubic-bezier(0.77, 0, 0.175, 1) 3s forwards;
+        }
+
+        .intro-logo-wrapper img {
+            width: 150px; 
+            height: auto;
+            opacity: 0;
+            content: url('img/logo.png'); 
+            animation: logoReveal 2.5s ease-in-out forwards;
+        }
+
+        @keyframes logoReveal {
+            0% { opacity: 0; transform: scale(0.9); }
+            40% { opacity: 1; transform: scale(1); }
+            80% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.1); }
+        }
+
+        @keyframes liftCurtain {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-100%); }
+        }
+
+        /* --- 3. BLACK NAVBAR --- */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--header-height); 
+            padding: 0 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-top: 25px; 
+            background: var(--nav-bg); 
+            z-index: 1000;
+            border-bottom: 1px solid #333; 
+            transition: all 0.3s ease;
+        }
+
+        .brand-logo img {
+            height: 30px; 
+            width: auto;
+            display: block;
+            /* OPTIONAL: Uncomment the line below if your logo is black text and invisible on the black bar. 
+               Only works well if image has transparent background. */
+            /* filter: invert(1); */
+        }
+
+        nav {
+            position: absolute;
+            left: 50%;
+            top: 25px; 
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .nav-list {
+            display: flex;
+            gap: 60px; 
+            position: relative;
+        }
+
+        .nav-item {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            color: var(--nav-text); 
+            padding-bottom: 30px; 
+        }
+
+        .submenu {
+            position: absolute;
+            top: 35px; 
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 25px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            pointer-events: none; 
+        }
+
+        .nav-item:hover .submenu { 
+            opacity: 1; 
+            visibility: visible; 
+            pointer-events: auto;
+        }
+
+        .submenu span {
+            color: var(--nav-sub-text); 
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+        
+        .submenu span:hover { color: #ffffff; text-decoration: underline; }
+
+        .menu-trigger {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            z-index: 1001; 
+            color: var(--nav-text); 
+        }
+
+        /* --- 4. MOBILE MENU --- */
+        #mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%; 
+            width: 100%; 
+            max-width: 400px; 
+            height: 100vh;
+            background: #ffffff; 
+            z-index: 1000;
+            transition: right 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+            padding: 120px 50px;
+            border-left: 1px solid #ddd;
+        }
+
+        #mobile-menu.active { right: 0; }
+
+        .mobile-links li {
+            font-size: 20px;
+            font-weight: 400;
+            margin-bottom: 25px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            color: #000; 
+        }
+        
+        .mobile-links li:hover { padding-left: 10px; transition: 0.3s; }
+
+        /* --- 5. MAIN CONTENT --- */
+        main {
+            padding: 0 50px 0 50px;
+            margin-top: 140px; 
+            opacity: 0; 
+            animation: fadeInPage 1s ease forwards 3.5s; 
+        }
+
+        @keyframes fadeInPage { to { opacity: 1; } }
+
+        .section-title {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 40px;
+            padding-top: 40px;
+            border-top: 1px solid #000;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); 
+            column-gap: 40px;
+            row-gap: 80px;
+            margin-bottom: 120px;
+        }
+
+        .project-card {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            cursor: pointer;
+        }
+
+        .image-wrapper {
+            width: 100%;
+            aspect-ratio: 16 / 9; 
+            overflow: hidden;
+            background-color: #f4f4f4;
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 1s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .project-card:hover .image-wrapper img { transform: scale(1.04); }
+
+        .meta-data {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+        }
+
+        .text-stack h2 {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .text-stack span {
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-top: 5px;
+        }
+
+        /* --- 6. STUDIO / TEAM SECTION --- */
+        #studio-section {
+            padding-top: 40px;
+            margin-bottom: 120px;
+            scroll-margin-top: 100px; /* Adjusts scroll landing position */
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 20px;
+        }
+
+        .team-member {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .member-photo {
+            width: 100%;
+            aspect-ratio: 3 / 4; 
+            background-color: #f0f0f0;
+            overflow: hidden;
+        }
+
+        .member-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: 0.3s;
+        }
+
+        .team-member:hover .member-photo img { filter: grayscale(0%); }
+
+        .member-info h3 {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .member-info p {
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        /* --- 7. CONTACT SECTION --- */
+        #contact-section {
+            padding-top: 40px;
+            margin-bottom: 80px;
+            scroll-margin-top: 100px; /* Adjusts scroll landing position */
+        }
+
+        /* ID for Projects to allow Navigation */
+        #projects-section {
+             scroll-margin-top: 120px;
+        }
+
+        .contact-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 80px;
+        }
+
+        .contact-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .office-block h3 {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .office-block p {
+            font-size: 12px;
+            line-height: 1.6;
+            color: #444;
+            max-width: 300px;
+        }
+
+        .contact-phone {
+            margin-top: 20px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        /* Enquiry Form */
+        .enquiry-form {
+            flex: 1;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 15px 0;
+            border: none;
+            border-bottom: 1px solid #ccc;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            outline: none;
+            background: transparent;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            border-bottom: 1px solid #000;
+        }
+
+        .submit-btn {
+            background: #000;
+            color: #fff;
+            border: none;
+            padding: 15px 40px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #333;
+        }
+
+        /* --- 8. FOOTER --- */
+        footer {
+            background-color: #000;
+            color: #fff;
+            padding: 40px 50px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            header { padding: 0 20px; height: 70px; }
+            nav { display: none; } 
+            .project-grid { grid-template-columns: 1fr; }
+            .team-grid { grid-template-columns: repeat(2, 1fr); gap: 40px; }
+            .contact-container { flex-direction: column; gap: 60px; }
+            main { padding: 0 20px; margin-top: 100px; }
+            footer { padding: 30px 20px; flex-direction: column; gap: 20px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="intro-overlay">
+        <div class="intro-logo-wrapper">
+            <img src="img/logo.png" alt="Loading...">
+        </div>
+    </div>
+
+    <header>
+        <a href="#" class="brand-logo" onclick="window.scrollTo(0,0)">
+            <img src="img/logo.png" alt="Ramees Ali Architecture">
+        </a>
+        
+        <nav>
+            <ul class="nav-list">
+                <li class="nav-item" onclick="scrollToId('projects-section')">
+                    Projects
+                    <div class="submenu">
+                        <span onclick="event.stopPropagation(); scrollToId('projects-section')">All Works</span>
+                        <span onclick="event.stopPropagation(); scrollToId('projects-section')">Residential</span>
+                        <span onclick="event.stopPropagation(); scrollToId('projects-section')">Commercial</span>
+                        <span onclick="event.stopPropagation(); scrollToId('projects-section')">Restoration</span>
+                    </div>
+                </li>
+                <li class="nav-item" onclick="scrollToId('studio-section')">
+                    Studio
+                    <div class="submenu">
+                        <span onclick="event.stopPropagation(); scrollToId('studio-section')">Our Team</span>
+                        <span onclick="event.stopPropagation(); scrollToId('studio-section')">Philosophy</span>
+                        <span onclick="event.stopPropagation(); scrollToId('studio-section')">Careers</span>
+                    </div>
+                </li>
+                <li class="nav-item" onclick="scrollToId('studio-section')">News</li>
+                <li class="nav-item" onclick="scrollToId('contact-section')">Contact</li>
+            </ul>
+        </nav>
+
+        <div class="menu-trigger" onclick="toggleMenu()">Menu +</div>
+    </header>
+
+    <div id="mobile-menu">
+        <ul class="mobile-links">
+            <li onclick="scrollToId('projects-section')">Projects</li>
+            <li onclick="scrollToId('studio-section')">Studio</li>
+            <li onclick="scrollToId('studio-section')">Journal</li>
+            <li onclick="scrollToId('contact-section')">Contact Us</li>
+        </ul>
+    </div>
+
+    <main>
+        
+        <div id="projects-section">
+            <span class="section-title">Selected Works</span>
+            
+            <div class="project-grid">
+                <article class="project-card">
+                    <div class="image-wrapper">
+                        <img src="img/house1.png" alt="Project 1">
+                    </div>
+                    <div class="meta-data">
+                        <div class="text-stack">
+                            <h2>The Stone Facade</h2>
+                            <span>Kozhikode, India</span>
+                        </div>
+                        <span style="font-size: 10px;">01</span>
+                    </div>
+                </article>
+
+                <article class="project-card">
+                    <div class="image-wrapper">
+                        <img src="img/house2.png" alt="Project 2">
+                    </div>
+                    <div class="meta-data">
+                        <div class="text-stack">
+                            <h2>Terracotta Twin</h2>
+                            <span>Malappuram, India</span>
+                        </div>
+                        <span style="font-size: 10px;">02</span>
+                    </div>
+                </article>
+
+                <article class="project-card">
+                    <div class="image-wrapper">
+                        <img src="img/house3.png" alt="Project 3">
+                    </div>
+                    <div class="meta-data">
+                        <div class="text-stack">
+                            <h2>Zen Cubic Villa</h2>
+                            <span>Cochin, India</span>
+                        </div>
+                        <span style="font-size: 10px;">03</span>
+                    </div>
+                </article>
+
+                <article class="project-card">
+                    <div class="image-wrapper">
+                        <img src="img/house4.png" alt="Project 4">
+                    </div>
+                    <div class="meta-data">
+                        <div class="text-stack">
+                            <h2>The Curved Atrium</h2>
+                            <span>Kannur, India</span>
+                        </div>
+                        <span style="font-size: 10px;">04</span>
+                    </div>
+                </article>
+
+                 <article class="project-card">
+                    <div class="image-wrapper">
+                        <img src="img/house5.png" alt="Project 5">
+                    </div>
+                    <div class="meta-data">
+                        <div class="text-stack">
+                            <h2>Terracotta Detail</h2>
+                            <span>Malappuram, India</span>
+                        </div>
+                        <span style="font-size: 10px;">05</span>
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <div id="studio-section">
+            <span class="section-title">The Studio</span>
+            <div class="team-grid">
+                <div class="team-member">
+                    <div class="member-photo"><img src="img/team/mem1.avif" alt="Member 1"></div>
+                    <div class="member-info"><h3>Ramees Ali</h3><p>Principal Architect</p></div>
+                </div>
+                <div class="team-member">
+                    <div class="member-photo"><img src="img/team/mem2.avif" alt="Member 2"></div>
+                    <div class="member-info"><h3>Sarah John</h3><p>Senior Architect</p></div>
+                </div>
+                <div class="team-member">
+                    <div class="member-photo"><img src="img/team/mem3.avif" alt="Member 3"></div>
+                    <div class="member-info"><h3>Arjun K.</h3><p>Interior Designer</p></div>
+                </div>
+                <div class="team-member">
+                    <div class="member-photo"><img src="img/team/mem4.avif" alt="Member 4"></div>
+                    <div class="member-info"><h3>Fatima S.</h3><p>Landscape Arch.</p></div>
+                </div>
+                <div class="team-member">
+                    <div class="member-photo"><img src="img/team/mem5.avif" alt="Member 5"></div>
+                    <div class="member-info"><h3>David Paul</h3><p>Visualizer</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="contact-section">
+            <span class="section-title">Contact</span>
+            
+            <div class="contact-container">
+                <div class="contact-info">
+                    <div class="office-block">
+                        <h3>Manjeri</h3>
+                        <p>30/113 C, KP Building, Opp. Indian Oil<br>Vayapparappadi, Manjeri<br>Malappuram 676121</p>
+                    </div>
+                    
+                    <div class="office-block">
+                        <h3>Kochi</h3>
+                        <p>Metro Pillar Number 843<br>Ground Floor, JK Rocca<br>Sahodaran Ayyappan Road<br>Janatha Junction, Vyttila<br>Kochi 682019</p>
+                    </div>
+
+                    <div class="office-block">
+                        <h3>Nilambur</h3>
+                        <p>VP Building, KNG Main Road<br>Nilambur<br>Malappuram 679 329</p>
+                    </div>
+
+                    <div class="contact-phone">
+                        T: +91 7594 033 330
+                    </div>
+                </div>
+
+                <div class="enquiry-form">
+                    <form action="#" method="POST">
+                        <div class="form-group">
+                            <input type="text" placeholder="Name" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" placeholder="Email" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" placeholder="Phone">
+                        </div>
+                        <div class="form-group">
+                            <textarea rows="4" placeholder="Message" required></textarea>
+                        </div>
+                        <button type="submit" class="submit-btn">Send Enquiry</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        <div class="copyright">
+            © 2026 by Ramees Ali Architecture + Design
+        </div>
+        <div class="social-links">
+            Instagram / Facebook / LinkedIn
+        </div>
+    </footer>
+
+    <script>
+        // FUNCTION: SCROLL TO SECTION
+        function scrollToId(id) {
+            const section = document.getElementById(id);
+            if(section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+                
+                // If mobile menu is open, close it
+                const menu = document.getElementById('mobile-menu');
+                if(menu.classList.contains('active')) {
+                    toggleMenu();
+                }
+            }
+        }
+
+        // FUNCTION: TOGGLE MOBILE MENU
+        function toggleMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const trigger = document.querySelector('.menu-trigger');
+            
+            menu.classList.toggle('active');
+            
+            if(menu.classList.contains('active')) {
+                trigger.style.color = "#000000"; 
+                trigger.textContent = "Close -";
+            } else {
+                trigger.style.color = "#ffffff";
+                trigger.textContent = "Menu +";
+            }
+        }
+    </script>
+</body>
+</html>
