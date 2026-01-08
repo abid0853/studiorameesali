@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RAMEES ALI | Architecture + Design</title>
     <style>
-        /* --- 1. RESET & BASICS --- */
+        /* --- 1. RESET & VARIABLES --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
@@ -54,7 +54,7 @@
             100% { transform: translateY(-100%); visibility: hidden; }
         }
 
-        /* --- 3. HEADER --- */
+        /* --- 3. DYNAMIC HEADER --- */
         header {
             position: fixed; top: 0; left: 0; width: 100%;
             min-height: var(--header-base-height); padding: 0 50px;
@@ -63,13 +63,23 @@
             display: flex; flex-direction: column; align-items: center;
         }
 
+        /* --- NEW: Header State when Mobile Menu is Open --- */
+        header.menu-active {
+            background: #ffffff !important; /* Turn white */
+            border-bottom: 1px solid #eee;
+        }
+        
+        /* Invert logo logic: 
+           Normal = Inverted (White on Black)
+           Menu Open = None (Black on White) */
+        .brand-logo img { height: 28px; width: auto; transition: filter 0.3s; }
+        header.menu-active .brand-logo img { filter: none; }
+
         .header-top {
             width: 100%; height: var(--header-base-height);
             display: flex; justify-content: space-between; align-items: center;
             position: relative; z-index: 2;
         }
-
-        .brand-logo img { height: 28px; width: auto;  }
 
         .main-nav { position: absolute; left: 50%; transform: translateX(-50%); }
         .nav-list { display: flex; gap: 50px; }
@@ -96,8 +106,11 @@
 
         .menu-trigger {
             font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-            cursor: pointer; color: var(--nav-text); z-index: 1001;
+            cursor: pointer; color: var(--nav-text); z-index: 1001; transition: color 0.3s;
         }
+        
+        /* Make trigger black when menu is open */
+        header.menu-active .menu-trigger { color: #000000; }
 
         /* --- 4. PROJECT FEED (CINEMATIC SCROLL STRIP) --- */
         main {
@@ -107,32 +120,23 @@
         }
         @keyframes fadeIn { to { opacity: 1; } }
 
-        /* The Container becomes the Scroll Track */
         .project-container {
             scroll-margin-top: 100px;
-            width: 100%; max-width: 1200px; /* Default centered width */
+            width: 100%; max-width: 1200px;
             margin-bottom: 120px;
             border-bottom: 1px solid #eee;
             padding-bottom: 60px;
             transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
-            /* Default vertical layout */
             display: block; 
             height: auto;
         }
 
-        /* --- PREVIEW IMAGE (DEFAULT STATE) --- */
         .project-preview {
-            cursor: pointer;
-            width: 100%;
-            position: relative;
-            transition: width 0.6s ease;
+            cursor: pointer; width: 100%; position: relative; transition: width 0.6s ease;
         }
 
         .preview-image {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            overflow: hidden;
-            background: #f4f4f4;
+            width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: #f4f4f4;
         }
 
         .preview-image img {
@@ -143,8 +147,7 @@
         .project-preview:hover .preview-image img { transform: scale(1.03); filter: grayscale(0%); }
 
         .preview-info {
-            margin-top: 20px;
-            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-top: 20px; display: flex; justify-content: space-between; align-items: flex-start;
         }
 
         .info-left h2 { font-size: 16px; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }
@@ -153,89 +156,45 @@
 
         /* --- OPEN STATE (THE STRIP) --- */
         .project-container.open {
-            /* Full width strip */
-            max-width: 100%; 
-            padding: 0; /* Remove padding to let scroll touch edges */
-            margin-bottom: 80px;
-            border-bottom: none;
-            
-            /* FIXED HEIGHT STRIP */
-            height: 75vh; /* This sets the height of the reel */
-            
-            /* Flex properties to make it a row */
-            display: flex;
-            flex-direction: row;
-            align-items: flex-start;
-            
-            /* HORIZONTAL SCROLL ENABLED ON CONTAINER */
-            overflow-x: auto; 
-            overflow-y: hidden;
-            
-            /* Hide scrollbar */
-            scrollbar-width: none; 
-            -ms-overflow-style: none;
+            max-width: 100%; padding: 0; margin-bottom: 80px; border-bottom: none;
+            height: 75vh; 
+            display: flex; flex-direction: row; align-items: flex-start;
+            overflow-x: auto; overflow-y: hidden;
+            scrollbar-width: none; -ms-overflow-style: none;
         }
         .project-container.open::-webkit-scrollbar { display: none; }
 
-        /* 1. Main Image in Strip */
         .project-container.open .project-preview {
-            height: 100%; /* Fill the strip height */
-            width: auto; /* Let width be defined by aspect ratio */
-            aspect-ratio: 16/9; /* Keep the correct shape */
-            flex-shrink: 0; /* Prevent squashing */
-            margin-right: 40px; /* Space after main image */
+            height: 100%; width: auto; aspect-ratio: 16/9; flex-shrink: 0; margin-right: 40px;
         }
         
         .project-container.open .preview-info {
-            /* Hide info or move it? Let's keep it overlay/bottom */
             position: absolute; bottom: 20px; left: 20px; width: calc(100% - 40px);
-            color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            margin-top: 0; z-index: 10;
+            color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.5); margin-top: 0; z-index: 10;
         }
         .project-container.open .info-left span { color: #ddd; }
         .project-container.open .expand-indicator { transform: rotate(45deg); color: #fff; }
 
-        /* 2. Details Wrapper */
-        .project-details {
-            display: none; /* Hidden by default */
-        }
+        .project-details { display: none; }
 
         .project-container.open .project-details {
-            display: flex; /* Row layout */
-            height: 100%;
-            gap: 40px;
-            opacity: 1;
-            animation: fadeIn 1s ease 0.3s forwards;
-            opacity: 0; /* Starts invisible for anim */
+            display: flex; height: 100%; gap: 40px;
+            opacity: 0; animation: fadeIn 1s ease 0.3s forwards;
         }
 
-        /* 3. Description Block */
         .description-block {
-            width: 400px; /* Fixed reading width */
-            flex-shrink: 0;
-            height: 100%;
+            width: 400px; flex-shrink: 0; height: 100%;
             display: flex; flex-direction: column; justify-content: center;
-            padding-right: 20px;
-            border-right: 1px solid #eee;
+            padding-right: 20px; border-right: 1px solid #eee;
         }
         .description-block p { font-size: 14px; line-height: 1.8; color: #333; margin-bottom: 25px; }
 
-        /* 4. Gallery Images */
-        .details-gallery {
-            display: flex;
-            height: 100%;
-            gap: 20px;
-        }
-
+        .details-gallery { display: flex; height: 100%; gap: 20px; }
         .details-gallery img {
-            height: 100%; /* Force image to match strip height */
-            width: auto; /* Width adjusts to maintain ratio */
-            object-fit: cover;
-            display: block;
-            filter: grayscale(0%);
+            height: 100%; width: auto; object-fit: cover; display: block; filter: grayscale(0%);
         }
 
-        /* --- TEAM & FOOTER --- */
+        /* --- TEAM & CONTACT --- */
         #team-section { display: none; width: 100%; max-width: 1000px; margin-bottom: 100px; animation: fadeIn 0.8s ease; }
         .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 30px; margin-top: 40px; }
         .team-member img { aspect-ratio: 1/1; object-fit: cover; margin-bottom: 15px; }
@@ -256,15 +215,23 @@
         .submit-btn { background: #000; color: #fff; border: none; padding: 15px 40px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; transition: background 0.3s; }
         
         footer { width: 100%; background-color: #000; color: #fff; padding: 80px 50px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
-        #mobile-menu { position: fixed; top: 0; right: -100%; width: 100%; height: 100vh; background: #fff; z-index: 999; transition: right 0.5s cubic-bezier(0.77, 0, 0.175, 1); padding: 120px 50px; }
+        
+        /* --- MOBILE MENU FIX --- */
+        #mobile-menu { 
+            position: fixed; top: 0; right: -100%; width: 100%; height: 100vh; 
+            background: #ffffff; z-index: 999; 
+            transition: right 0.5s cubic-bezier(0.77, 0, 0.175, 1); 
+            padding: 140px 50px 50px 50px; /* Increased top padding to clear header */
+        }
         #mobile-menu.active { right: 0; }
         .mobile-links li { font-size: 24px; font-weight: 700; margin-bottom: 30px; cursor: pointer; color: #000; text-transform: uppercase; }
 
-        /* --- MOBILE RESET --- */
+        /* --- RESPONSIVE CSS --- */
         @media (max-width: 1024px) {
-            header { padding: 0 20px; } .main-nav { display: none; }
+            header { padding: 0 20px; } 
+            .main-nav { display: none; } /* Hide Desktop Nav */
             
-            /* Reset Strip to Vertical */
+            /* Vertical Project Layout for Mobile */
             .project-container.open { height: auto; display: block; overflow: visible; padding-bottom: 40px; max-width: 100%; margin-bottom: 60px; }
             .project-container.open .project-preview { width: 100%; height: auto; aspect-ratio: 16/9; margin-right: 0; margin-bottom: 20px; }
             .project-container.open .preview-info { position: relative; bottom: 0; left: 0; width: 100%; color: #000; text-shadow: none; }
@@ -273,8 +240,8 @@
             
             .project-container.open .project-details { flex-direction: column; gap: 30px; opacity: 1; animation: none; }
             .description-block { width: 100%; border-right: none; height: auto; padding-right: 0; border-bottom: 1px solid #eee; padding-bottom: 20px;}
-            .details-gallery { flex-direction: column; width: 100%; height: auto; }
-            .details-gallery img { width: 100%; height: auto; aspect-ratio: 16/9; }
+            .details-gallery { flex-direction: column; width: 100%; height: auto; gap: 20px; display: flex; }
+            .details-gallery img { width: 100%; height: auto; aspect-ratio: 16/9; max-height: none; }
             
             .contact-container { flex-direction: column; gap: 60px; }
             main { padding: 0 20px; margin-top: 100px; }
@@ -313,7 +280,7 @@
             <li onclick="showAllProjects(); toggleMenu();">Projects</li>
             <li onclick="showTeam(); toggleMenu();">Our Team</li>
             <li>News</li>
-            <li>Contact</li>
+            <li onclick="document.getElementById('contact-section').scrollIntoView({behavior: 'smooth'}); toggleMenu();">Contact</li>
         </ul>
     </div>
 
@@ -328,10 +295,8 @@
                 <div class="team-member"><img src="img/team/mem4.avif"><h3>Razin.</h3><p>Senior Interior Designer</p></div>
                 <div class="team-member"><img src="img/team/mem5.avif"><h3>Shirin</h3><p>Junior Architect</p></div>
                 <div class="team-member"><img src="img/team/mem6.avif"><h3>Ahad</h3><p>Project Manager</p></div>
-                <div class="team-member"><img src="img/team/mem7.avif"><h3>DMidhun Rajagopal</h3><p>Project Managerr</p></div>
+                <div class="team-member"><img src="img/team/mem7.avif"><h3>Midhun Rajagopal</h3><p>Project Manager</p></div>
                 <div class="team-member"><img src="img/team/mem8.avif"><h3>Sarita</h3><p>HR Manager</p></div>
-
-
             </div>
         </section>
 
@@ -466,12 +431,9 @@
         function toggleProject(id) {
             const project = document.getElementById(id);
             const isOpen = project.classList.contains('open');
-            // Close all others
             document.querySelectorAll('.project-container').forEach(p => p.classList.remove('open'));
-            
             if (!isOpen) {
                 project.classList.add('open');
-                // Center the active strip on screen
                 setTimeout(() => {
                     project.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }, 300);
@@ -492,14 +454,29 @@
         }
         function showAllProjects() {
             document.querySelectorAll('.project-container').forEach(p => {
-                p.style.display = 'block'; // Reset to default layout
+                p.style.display = 'block'; 
                 p.classList.remove('open');
             });
             document.getElementById('team-section').style.display = 'none';
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
+        
+        // --- UPDATED TOGGLE MENU FUNCTION ---
         function toggleMenu() {
-            document.getElementById('mobile-menu').classList.toggle('active');
+            const menu = document.getElementById('mobile-menu');
+            const header = document.getElementById('main-header');
+            const trigger = document.querySelector('.menu-trigger');
+            
+            menu.classList.toggle('active');
+            
+            // Toggle header state to change background/logo color
+            if(menu.classList.contains('active')) {
+                header.classList.add('menu-active');
+                trigger.textContent = "Close -";
+            } else {
+                header.classList.remove('menu-active');
+                trigger.textContent = "Menu +";
+            }
         }
     </script>
 </body>
