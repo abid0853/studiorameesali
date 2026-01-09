@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAMEES ALI | Architecture + Design</title>
+    <style>
+        /* --- 1. RESET & VARIABLES --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+    --bg-color: #ffffff;
+    --text-primary: #000000;
+    --text-secondary: #666666;
+    /* --- CHANGED TO WHITE THEME --- */
+    --nav-bg: #ffffff; 
+    --nav-text: #000000;
+    --nav-sub-text: #666666;
+    --font-main: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --header-base-height: 80px; 
+}
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        a { text-decoration: none; color: inherit; cursor: pointer; }
+        ul { list-style: none; }
+        img { display: block; width: 100%; }
+
+        /* --- 2. INTRO ANIMATION --- */
+        #intro-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            background-color: #000; z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+            pointer-events: none;
+            animation: liftCurtain 1s cubic-bezier(0.77, 0, 0.175, 1) 2.5s forwards;
+        }
+
+        .intro-logo-wrapper img { width: 500px; height: auto; opacity: 0; animation: logoReveal 2s ease-in-out forwards; }
+
+        @keyframes logoReveal {
+            0% { opacity: 0; transform: scale(0.9); }
+            40% { opacity: 1; transform: scale(1); }
+            80% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.1); }
+        }
+        @keyframes liftCurtain {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-100%); visibility: hidden; }
+        }
+
+        /* --- 3. DYNAMIC HEADER --- */
+        header {
+    position: fixed; top: 0; left: 0; width: 100%;
+    min-height: var(--header-base-height); padding: 0 50px;
+    background: var(--nav-bg); z-index: 1000;
+    /* Changed border to light gray for white theme */
+    border-bottom: 1px solid #eee; 
+    transition: all 0.4s ease;
+    display: flex; flex-direction: column; align-items: center;
+}
+
+        /* --- Header State when Mobile Menu is Open --- */
+        header.menu-active {
+    background: #ffffff !important; 
+    border-bottom: 1px solid #eee;
+}
+        
+        .brand-logo img { 
+    height: 80px; 
+    width: auto; 
+    filter: invert(1); /* Changed from filter: invert(1) */
+}
+        header.menu-active .brand-logo img { 
+    filter: invert(1); /* Changed from filter: invert(1) */
+}
+
+        .header-top {
+            width: 100%; height: var(--header-base-height);
+            display: flex; justify-content: space-between; align-items: center;
+            position: relative; z-index: 2;
+        }
+
+        .main-nav { position: absolute; left: 50%; transform: translateX(-50%); }
+        .nav-list { display: flex; gap: 50px; }
+        .nav-item {
+            font-size: 11px; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+            color: var(--nav-text); 
+            cursor: pointer; 
+            padding: 10px 0;
+            
+            /* REQUIRED FOR ANIMATION */
+            position: relative; 
+            display: inline-block;
+        }
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 1px;
+            bottom: 5px; /* Adjust distance from text */
+            left: 0;
+            background-color: currentColor; /* Matches text color automatically */
+            transform: scaleX(0);
+            transform-origin: right; /* Slides out to the right */
+            transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .nav-item:hover::after {
+            transform: scaleX(1);
+            transform-origin: left; /* Slides in from the left */
+        }
+
+        .header-bottom {
+    width: 100%; height: 0; overflow: hidden;
+    display: flex; justify-content: center; align-items: center;
+    transition: height 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    background: #ffffff; /* Changed from #000 */
+}
+        header.sub-open .header-bottom { 
+    height: 50px; 
+    border-top: 1px solid #eee; /* Changed from #222 */
+}
+
+        .sub-nav-list { display: none; gap: 40px; }
+        .sub-nav-list.active { display: flex; animation: fadeIn 0.5s ease; }
+        .sub-nav-item {
+            font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;
+            color: var(--nav-sub-text); cursor: pointer; transition: color 0.3s;
+        }
+        .sub-nav-item:hover { color: #fff; }
+
+        .menu-trigger {
+            font-size: 11px; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            cursor: pointer; 
+            color: var(--nav-text); 
+            z-index: 1001; 
+            transition: color 0.3s;
+            
+            /* REQUIRED FOR ANIMATION */
+            position: relative;
+            display: inline-block;
+        }
+        
+        .menu-trigger::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 1px;
+            bottom: -5px; /* Adjust distance from text */
+            left: 0;
+            background-color: currentColor;
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .menu-trigger:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+       header.menu-active .menu-trigger { 
+    color: #000000; 
+}
+
+        /* --- 4. PROJECT FEED (UPDATED SIZING) --- */
+        main {
+            padding: 0 50px; margin-top: 140px; opacity: 0;
+            animation: fadeIn 1s ease forwards 3s;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        @keyframes fadeIn { to { opacity: 1; } }
+
+        .project-container {
+            scroll-margin-top: 100px;
+            width: 100%; 
+            /* CHANGE 1: Reduced max-width from 1200px to 850px for shorter/centered look */
+            max-width: 850px; 
+            margin-bottom: 120px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 60px;
+            transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+            display: block; 
+            height: auto;
+        }
+
+        .project-preview {
+            cursor: pointer; width: 100%; position: relative; transition: width 0.6s ease;
+        }
+
+        .preview-image {
+            width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: #f4f4f4;
+        }
+
+        .preview-image img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 1.2s cubic-bezier(0.19, 1, 0.22, 1);
+            filter: grayscale(20%);
+        }
+        .project-preview:hover .preview-image img { transform: scale(1.03); filter: grayscale(0%); }
+
+        .preview-info {
+            margin-top: 20px; display: flex; justify-content: space-between; align-items: flex-start;
+        }
+
+        .info-left h2 { font-size: 16px; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }
+        .info-left span { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+        .expand-indicator { font-size: 24px; font-weight: 300; transition: transform 0.4s; }
+
+        /* --- OPEN STATE (THE STRIP) --- */
+        .project-container.open {
+            max-width: 100%; padding: 0; margin-bottom: 80px; border-bottom: none;
+            /* CHANGE 2: Reduced height from 75vh to 55vh for a shorter strip */
+            height: 55vh; 
+            display: flex; flex-direction: row; align-items: flex-start;
+            overflow-x: auto; overflow-y: hidden;
+            scrollbar-width: none; -ms-overflow-style: none;
+        }
+        .project-container.open::-webkit-scrollbar { display: none; }
+
+        .project-container.open .project-preview {
+            height: 100%; width: auto; aspect-ratio: 16/9; flex-shrink: 0; margin-right: 40px;
+        }
+        
+        .project-container.open .preview-info {
+            position: absolute; bottom: 20px; left: 20px; width: calc(100% - 40px);
+            color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.5); margin-top: 0; z-index: 10;
+        }
+        .project-container.open .info-left span { color: #ddd; }
+        .project-container.open .expand-indicator { transform: rotate(45deg); color: #fff; }
+
+        .project-details { display: none; }
+
+        .project-container.open .project-details {
+            display: flex; height: 100%; gap: 40px;
+            opacity: 0; animation: fadeIn 1s ease 0.3s forwards;
+        }
+
+        .description-block {
+            width: 400px; flex-shrink: 0; height: 100%;
+            display: flex; flex-direction: column; justify-content: center;
+            padding-right: 20px; border-right: 1px solid #eee;
+        }
+        .description-block p { font-size: 14px; line-height: 1.8; color: #333; margin-bottom: 25px; }
+
+        .details-gallery { display: flex; height: 100%; gap: 20px; }
+        .details-gallery img {
+            height: 100%; width: auto; object-fit: cover; display: block; filter: grayscale(0%);
+        }
+
+        /* --- TEAM & CONTACT --- */
+        #team-section { display: none; width: 100%; max-width: 1000px; margin-bottom: 100px; animation: fadeIn 0.8s ease; }
+        .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 30px; margin-top: 40px; }
+        .team-member img { aspect-ratio: 1/1; object-fit: cover; margin-bottom: 15px; }
+        .team-member:hover img { filter: grayscale(0); }
+        .team-member h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+        .team-member p { font-size: 10px; color: #888; text-transform: uppercase; }
+
+        #contact-section { padding-top: 40px; margin-bottom: 80px; width: 100%; max-width: 1200px; }
+        .contact-container { display: flex; justify-content: space-between; gap: 80px; }
+        .contact-info { flex: 1; display: flex; flex-direction: column; gap: 40px; }
+        .office-block h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; }
+        .office-block p { font-size: 12px; line-height: 1.6; color: #444; max-width: 300px; }
+        .contact-phone { margin-top: 20px; font-size: 14px; font-weight: 700; }
+        .enquiry-form { flex: 1; }
+        .form-group { margin-bottom: 30px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 15px 0; border: none; border-bottom: 1px solid #ccc; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; outline: none; background: transparent; transition: border-color 0.3s; }
+        .form-group input:focus { border-bottom: 1px solid #000; }
+        .submit-btn { background: #000; color: #fff; border: none; padding: 15px 40px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; transition: background 0.3s; }
+        
+        footer { width: 100%; background-color: #000; color: #fff; padding: 80px 50px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* --- MOBILE MENU --- */
+        #mobile-menu { 
+            position: fixed; top: 0; right: -100%; width: 100%; height: 100vh; 
+            background: #ffffff; z-index: 999; 
+            transition: right 0.5s cubic-bezier(0.77, 0, 0.175, 1); 
+            padding: 140px 50px 50px 50px;
+        }
+        #mobile-menu.active { right: 0; }
+        .mobile-links li { font-size: 24px; font-weight: 700; margin-bottom: 30px; cursor: pointer; color: #000; text-transform: uppercase; }
+
+        /* --- RESPONSIVE CSS --- */
+        @media (max-width: 1024px) {
+            header { padding: 0 20px; } 
+            .main-nav { display: none; }
+            
+            .project-container { max-width: 100%; } /* Reset constraint on mobile */
+            .project-container.open { height: auto; display: block; overflow: visible; padding-bottom: 40px; max-width: 100%; margin-bottom: 60px; }
+            .project-container.open .project-preview { width: 100%; height: auto; aspect-ratio: 16/9; margin-right: 0; margin-bottom: 20px; }
+            .project-container.open .preview-info { position: relative; bottom: 0; left: 0; width: 100%; color: #000; text-shadow: none; }
+            .project-container.open .info-left span { color: #666; }
+            .project-container.open .expand-indicator { color: #000; }
+            
+            .project-container.open .project-details { flex-direction: column; gap: 30px; opacity: 1; animation: none; }
+            .description-block { width: 100%; border-right: none; height: auto; padding-right: 0; border-bottom: 1px solid #eee; padding-bottom: 20px;}
+            .details-gallery { flex-direction: column; width: 100%; height: auto; gap: 20px; display: flex; }
+            .details-gallery img { width: 100%; height: auto; aspect-ratio: 16/9; max-height: none; }
+            
+            .contact-container { flex-direction: column; gap: 60px; }
+            main { padding: 0 20px; margin-top: 100px; }
+            footer { flex-direction: column; gap: 30px; text-align: center;}
+        }
+    </style>
+</head>
+<body>
+
+    <div id="intro-overlay"><div class="intro-logo-wrapper"><img src="img/logo.png" alt="Loading..."></div></div>
+
+    <header id="main-header">
+        <div class="header-top">
+            <a href="#" class="brand-logo" onclick="showAllProjects()"><img src="img/logo.png" alt="Ramees Ali Architecture"></a>
+            <nav class="main-nav">
+                <ul class="nav-list">
+                    <li class="nav-item" onclick="showAllProjects()">Projects</li>
+                    <li class="nav-item" onclick="showTeam()">Studio</li>
+                    <li class="nav-item">News</li>
+                    <li class="nav-item" onclick="document.getElementById('contact-section').scrollIntoView({behavior: 'smooth'})">Contact</li>
+                </ul>
+            </nav>
+            <div class="menu-trigger" onclick="toggleMenu()">Menu +</div>
+        </div>
+    </header>
+
+    <div id="mobile-menu">
+        <ul class="mobile-links">
+            <li onclick="showAllProjects(); toggleMenu();">Projects</li>
+            <li onclick="showTeam(); toggleMenu();">Our Team</li>
+            <li>News</li>
+            <li onclick="document.getElementById('contact-section').scrollIntoView({behavior: 'smooth'}); toggleMenu();">Contact</li>
+        </ul>
+    </div>
+
+    <main id="content-main">
+        
+        <section id="team-section">
+            <h2 style="text-transform: uppercase; letter-spacing: 2px; font-size: 18px;">Our Team</h2>
+            <div class="team-grid">
+                <div class="team-member"><img src="img/team/mem1.avif"><h3>Ramees Ali</h3><p>Founder & CEO</p></div>
+                <div class="team-member"><img src="img/team/mem2.avif"><h3>Safana</h3><p>Director</p></div>
+                <div class="team-member"><img src="img/team/mem3.avif"><h3>Arjun K.</h3><p>Interior Designer</p></div>
+                <div class="team-member"><img src="img/team/mem4.avif"><h3>Razin.</h3><p>Senior Interior Designer</p></div>
+                <div class="team-member"><img src="img/team/mem5.avif"><h3>Shirin</h3><p>Junior Architect</p></div>
+                <div class="team-member"><img src="img/team/mem6.avif"><h3>Ahad</h3><p>Project Manager</p></div>
+                <div class="team-member"><img src="img/team/mem7.avif"><h3>Midhun Rajagopal</h3><p>Project Manager</p></div>
+                <div class="team-member"><img src="img/team/mem8.avif"><h3>Sarita</h3><p>HR Manager</p></div>
+            </div>
+        </section>
+
+         <div class="project-container" id="p1">
+            <div class="project-preview" onclick="toggleProject('p1')">
+                <div class="preview-image"><img src="img/projects/house1.1.png"></div>
+                <div class="preview-info">
+                    <div class="info-left"><h2>Samrudhi House</h2><span>Bed 4 Bath 4 SqFt 1820 | Alappuzha</span></div>
+                    <div class="expand-indicator">+</div>
+                </div>
+            </div>
+            <div class="project-details">
+                <div class="description-block">
+                    <p>AJITHA RESIDENCE</p><p>Ajitha Residence, located in Alappuzha and commissioned by Mrs. Ajitha, is a modern home distinguished by its contemporary exterior and meticulous brick cladding detailing. The design seamlessly blends traditional brickwork with sleek, modern architectural elements, creating a visually striking facade. Spanning a built-up area of 1900 sqft, the residence embodies a sophisticated aesthetic while harmonizing with the surrounding landscape of Alappuzha, known for its serene backwaters and lush greenery. The project, initiated in 2023, is currently ongoing.</p>
+                    <p><strong>Year:</strong> 2024<br><strong>Area:</strong> 1820 sqft</p>
+                </div>
+                <div class="details-gallery">
+                    <img src="img/projects/house1.1.png">
+                    <img src="img/projects/house1.2.png">
+                    <img src="img/projects/house1.3.png">
+                    <img src="img/projects/house1.4.png">
+                    <img src="img/projects/house1.5.png">
+                </div>
+            </div>
+        </div>
+
+        <div class="project-container" id="p2">
+            <div class="project-preview" onclick="toggleProject('p2')">
+                <div class="preview-image"><img src="img/projects/house2.1.png"></div>
+                <div class="preview-info">
+                    <div class="info-left"><h2>Asif Villa</h2><span>Bed 4 Bath 4 SqFt 3000 | Nilambur</span></div>
+                    <div class="expand-indicator">+</div>
+                </div>
+            </div>
+            <div class="project-details">
+                <div class="description-block">
+                    <p>ASIF VILLA</p>
+                    <p>Asif Villa, located in Nilambur, a 2700 square foot modern architectural project, exemplifies minimalism and elegance in residential design. The villa boasts clean lines, open spaces, and a harmonious blend of functionality and aesthetics. The interiors are meticulously curated to emphasize simplicity, utilizing a neutral color palette, natural materials, and ample natural light to create a serene and sophisticated living environment. Each element, from the thoughtfully designed layout to the carefully selected furnishings, contributes to a cohesive and tranquil atmosphere, making Asif Villa a model of modern elegance and understated luxury</p>
+                    <p><strong>Year:</strong> 2023</p>
+                </div>
+                <div class="details-gallery">
+                    <img src="img/projects/house2.1.png">
+                    <img src="img/projects/house2.2.png">
+                    <img src="img/projects/house2.3.png">
+                    <img src="img/projects/house2.4.png">
+                    <img src="img/projects/house2.5.png">
+                    
+                </div>
+            </div>
+        </div>
+
+        <div class="project-container" id="p3">
+            <div class="project-preview" onclick="toggleProject('p3')">
+                <div class="preview-image"><img src="img/projects/house3.1.png"></div>
+                <div class="preview-info">
+                    <div class="info-left"><h2>Srishti House</h2><span>Bed 4 Bath 4 SqFt 1500 | Palakkad</span></div>
+                    <div class="expand-indicator">+</div>
+                </div>
+            </div>
+            <div class="project-details">
+                <div class="description-block"><p>SRISHTI HOUSE</p><p>Srishti House, located in Palakkad, is a charming two-story residence spanning 1400 square feet, designed for Mr. Jithesh and Ms. Reshma. This well-appointed home features three spacious bedrooms, each with an attached bathroom, ensuring privacy and comfort. Combining modern aesthetics with functional design, Srishti House offers a cozy yet efficient living space, perfectly suited to the needs of its residents.</p></div>
+                <div class="details-gallery">
+                    <img src="img/projects/house3.1.png">
+                    <img src="img/projects/house3.2.png">
+                    <img src="img/projects/house3.3.png">
+                    <img src="img/projects/house3.4.png">
+                    <img src="img/projects/house3.5.png">
+                </div>
+            </div>
+        </div>
+
+        <div class="project-container" id="p4">
+            <div class="project-preview" onclick="toggleProject('p4')">
+                <div class="preview-image"><img src="img/projects/house4.1.png"></div>
+                <div class="preview-info">
+                    <div class="info-left"><h2>TThe Gazebo</h2><span>Bed 4 Bath 4 SqFt 3170 | Kochi</span></div>
+                    <div class="expand-indicator">+</div>
+                </div>
+            </div>
+            <div class="project-details">
+                <div class="description-block"><p>SHAJI UMMER RESIDENCE</p><p>Shaji Ummer Residence, located in the serene town of Kochi, is a captivating two-story home covering 3170 square feet, thoughtfully crafted for Mr. Shaji Ummer and his family. This exquisite residence features four generous bedrooms, each with its own attached bathroom, ensuring the highest level of privacy and comfort for all occupants. The design philosophy harmoniously integrates modern aesthetics with functional efficiency, resulting in a cozy yet highly practical living space that perfectly meets the needs of its residents. A standout feature is the floating gazebo, which is designed to delight all who see it. The ample glass areas throughout the house ensure abundant natural light, enhancing the overall ambiance and warmth of the home.</p></div>
+                <div class="details-gallery">
+                    <img src="img/projects/house4.1.png">
+                    <img src="img/projects/house4.2.png">
+                    <img src="img/projects/house4.3.png">
+                    <img src="img/projects/house4.4.png">
+
+                </div>
+            </div>
+        </div>
+
+        <div class="project-container" id="p5">
+            <div class="project-preview" onclick="toggleProject('p5')">
+                <div class="preview-image"><img src="img/projects/house5.png"></div>
+                <div class="preview-info">
+                    <div class="info-left"><h2>BS House</h2><span>Bed 4 Bath 4 SqFt 2500 | Trivandrum</span></div>
+                    <div class="expand-indicator">+</div>
+                </div>
+            </div>
+            <div class="project-details">
+                <div class="description-block"><p>BIJU SAM RESIDENCE</p><p>Biju Sam Residence in Trivandrum is a 2000 square foot, 4-bedroom home that epitomizes minimalist design both inside and out. The exterior features clean, unadorned lines and a simple yet striking aesthetic that blends seamlessly with its surroundings. Inside, the residence continues this theme of minimalism, with a focus on functionality and uncluttered spaces. The interiors are designed with a neutral color scheme, incorporating natural materials and strategic lighting to enhance the sense of openness and tranquility. Each room is thoughtfully arranged to maximize space and comfort, creating a harmonious and inviting living environment. The Biju Sam Residence stands as a testament to the beauty of minimalism in modern residential architecture.</p></div>
+                <div class="details-gallery">
+                    <img src="img/projects/house5.1.png">
+                    <img src="img/projects/house5.2.png">
+                    <img src="img/projects/house5.3.png">
+                    <img src="img/projects/house5.4.png">
+
+                </div>
+            </div>
+        </div>
+
+        <div id="contact-section">
+            <span class="section-title">Contact</span>
+            <div class="contact-container">
+                <div class="contact-info">
+                    <div class="office-block"><h3>Manjeri</h3><p>Ramees Ali Architecture + Design | 30/113 C, KP Building, Opp. Indian Oil | Vayapparappadi | Manjeri | Malappuram 676121</p></div>
+                    <div class="office-block"><h3>Kochi</h3><p>Ramees Ali Architecture + Design | Metro Pillar Number 843 | Ground Floor, JK Rocca, | Sahodaran Ayyappan Road | Janatha Junction, Vyttila | Kochi 682019</p></div>
+                    <div class="contact-phone">Tel: +91 7594 033 330</div>
+                </div>
+                <div class="enquiry-form">
+                    <form action="#" method="POST">
+                        <div class="form-group"><input type="text" placeholder="Name" required></div>
+                        <div class="form-group"><input type="email" placeholder="Email" required></div>
+                        <div class="form-group"><input type="tel" placeholder="Phone"></div>
+                        <div class="form-group"><textarea rows="4" placeholder="Message" required></textarea></div>
+                        <button type="submit" class="submit-btn">Send Enquiry</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        <div class="copyright">© 2026 by Ramees Ali Architecture + Design</div>
+        <div class="social-links">Instagram | Facebook | LinkedIn</div>
+    </footer>
+
+    <script>
+        function toggleProject(id) {
+            const project = document.getElementById(id);
+            const isOpen = project.classList.contains('open');
+            document.querySelectorAll('.project-container').forEach(p => p.classList.remove('open'));
+            if (!isOpen) {
+                project.classList.add('open');
+                setTimeout(() => {
+                    project.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+            }
+        }
+        function toggleSubNav(category) {
+            const header = document.getElementById('main-header');
+            const targetList = document.getElementById('sub-' + category);
+            const isAlreadyOpen = targetList.classList.contains('active');
+            document.querySelectorAll('.sub-nav-list').forEach(list => list.classList.remove('active'));
+            if (isAlreadyOpen) { header.classList.remove('sub-open'); } 
+            else { header.classList.add('sub-open'); targetList.classList.add('active'); }
+        }
+        function showTeam() {
+            document.querySelectorAll('.project-container').forEach(p => p.style.display = 'none');
+            document.getElementById('team-section').style.display = 'block';
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+        function showAllProjects() {
+            document.querySelectorAll('.project-container').forEach(p => {
+                p.style.display = 'block'; 
+                p.classList.remove('open');
+            });
+            document.getElementById('team-section').style.display = 'none';
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+        function toggleMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const header = document.getElementById('main-header');
+            const trigger = document.querySelector('.menu-trigger');
+            menu.classList.toggle('active');
+            if(menu.classList.contains('active')) {
+                header.classList.add('menu-active');
+                trigger.textContent = "Close -";
+            } else {
+                header.classList.remove('menu-active');
+                trigger.textContent = "Menu +";
+            }
+        }
+    </script>
+</body>
+</html>
